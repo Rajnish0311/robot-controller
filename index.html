@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+body {
+  font-family: Arial, Helvetica, sans-serif;
+  background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+  text-align: center;
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+}
+
+.container {
+  max-width: 360px;
+  margin: auto;
+  padding: 20px;
+  backdrop-filter: blur(10px);
+  background: rgba(255,255,255,0.08);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+}
+
+h2 { color: #fff; }
+
+.btn {
+  width: 100px;
+  height: 55px;
+  font-size: 16px;
+  margin: 6px;
+  border: none;
+  border-radius: 10px;
+  background: #4a6fa5;
+  color: white;
+}
+
+.btn:active { background: #103465; }
+
+.stop { background: #d9534f; }
+.stop:active { background: #b52b27; }
+
+.speed-box {
+  margin-top: 20px;
+  background: rgba(255,255,255,0.15);
+  padding: 15px;
+  border-radius: 12px;
+  color: white;
+}
+
+input[type=range] { width: 100%; }
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 34px;
+}
+.switch input { display:none; }
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: #ccc;
+  transition: .4s;
+  border-radius: 34px;
+}
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 26px; width: 26px;
+  left: 4px; bottom: 4px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+}
+input:checked + .slider { background-color: #2196F3; }
+input:checked + .slider:before { transform: translateX(26px); }
+
+.mode-label { color:white; margin:8px; }
+</style>
+</head>
+
+<body>
+<div class="container">
+  <h2>Wi-Fi Robot Controller</h2>
+
+  <!-- Toggle Switch -->
+  <label class="switch">
+    <input type="checkbox" onchange="toggleMode(this)">
+    <span class="slider"></span>
+  </label>
+  <div class="mode-label" id="modeLabel">Button Controls</div>
+
+  <!-- BUTTON CONTROLS -->
+  <div id="buttonControls">
+    <button class="btn"
+      onmousedown="cmd('F')" onmouseup="cmd('S')"
+      ontouchstart="cmd('F')" ontouchend="cmd('S')">
+      Forward
+    </button><br>
+
+    <button class="btn"
+      onmousedown="cmd('L')" onmouseup="cmd('S')"
+      ontouchstart="cmd('L')" ontouchend="cmd('S')">
+      Left
+    </button>
+
+    <button class="btn stop" onclick="cmd('S')">
+      Stop
+    </button>
+
+    <button class="btn"
+      onmousedown="cmd('R')" onmouseup="cmd('S')"
+      ontouchstart="cmd('R')" ontouchend="cmd('S')">
+      Right
+    </button><br>
+
+    <button class="btn"
+      onmousedown="cmd('B')" onmouseup="cmd('S')"
+      ontouchstart="cmd('B')" ontouchend="cmd('S')">
+      Backward
+    </button>
+  </div>
+
+  <!-- JOYSTICK CONTROLS -->
+  <div id="joystickControls" style="display:none;">
+    <div id="joy" style="width:220px;height:220px;margin:20px auto;"></div>
+  </div>
+
+  <div class="speed-box">
+    <p>Speed Control</p>
+    <input type="range" min="0" max="1023" value="800"
+           onchange="setSpeed(this.value)">
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/nipplejs@0.10.1/dist/nipplejs.min.js"></script>
+<script>
+function cmd(c){
+  fetch('/move?dir=' + c);
+}
+function setSpeed(v){
+  fetch('/speed?val=' + v);
+}
+
+function toggleMode(el){
+  const btn = document.getElementById("buttonControls");
+  const joy = document.getElementById("joystickControls");
+  const label = document.getElementById("modeLabel");
+
+  if(el.checked){
+    btn.style.display = "none";
+    joy.style.display = "block";
+    label.innerText = "Joystick Controls";
+  } else {
+    btn.style.display = "block";
+    joy.style.display = "none";
+    label.innerText = "Button Controls";
+  }
+}
+
+// Joystick
+var joystick = nipplejs.create({
+  zone: document.getElementById('joy'),
+  mode: 'static',
+  position: { left: '50%', top: '50%' },
+  color: 'white'
+});
+
+joystick.on('move', function(evt, data) {
+  if(data){
+    let x = Math.round(data.vector.x * 100);
+    let y = Math.round(data.vector.y * 100);
+    fetch(`/move?x=${x}&y=${y}`);
+  }
+});
+
+joystick.on('end', function(){
+  fetch('/move?dir=S');
+});
+</script>
+</body>
+</html>
