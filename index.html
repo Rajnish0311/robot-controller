@@ -141,7 +141,7 @@ input:checked + .slider:before { transform: translateX(26px); }
 
 <script>
 
-// ---------- BASIC ----------
+// -------- BASIC --------
 function cmd(c){
   fetch('/move?dir=' + c);
 }
@@ -150,7 +150,7 @@ function setSpeed(v){
   fetch('/speed?val=' + v);
 }
 
-// ---------- MODE SWITCH ----------
+// -------- MODE SWITCH --------
 function toggleMode(el){
   const btn = document.getElementById("buttonControls");
   const joy = document.getElementById("joystickControls");
@@ -160,6 +160,10 @@ function toggleMode(el){
     btn.style.display = "none";
     joy.style.display = "block";
     label.innerText = "Joystick Controls";
+
+    // 🔥 create joystick AFTER visible
+    setTimeout(createJoystick, 100);
+
   } else {
     btn.style.display = "block";
     joy.style.display = "none";
@@ -167,7 +171,8 @@ function toggleMode(el){
   }
 }
 
-// ---------- JOYSTICK FINAL FIX ----------
+// -------- JOYSTICK FIX --------
+let joystick = null;
 let lastDir = "";
 
 function sendDir(dir){
@@ -177,43 +182,48 @@ function sendDir(dir){
   }
 }
 
-var joystick = nipplejs.create({
-  zone: document.getElementById('joy'),
-  mode: 'dynamic',   // 🔥 FIXED
-  color: 'white',
-  size: 150
-});
+function createJoystick(){
 
-joystick.on('move', function(evt, data) {
-  if (!data || !data.angle) return;
+  if(joystick) return;
 
-  let angle = data.angle.degree;
-  let distance = data.distance;
+  joystick = nipplejs.create({
+    zone: document.getElementById('joy'),
+    mode: 'dynamic',
+    color: 'white',
+    size: 150
+  });
 
-  let dir = "S";
+  joystick.on('move', function(evt, data) {
+    if (!data || !data.angle) return;
 
-  if (distance < 20) {
-    dir = "S";
-  }
-  else if (angle >= 45 && angle < 135) {
-    dir = "F"; // UP
-  }
-  else if (angle >= 135 && angle < 225) {
-    dir = "L"; // LEFT
-  }
-  else if (angle >= 225 && angle < 315) {
-    dir = "B"; // DOWN
-  }
-  else {
-    dir = "R"; // RIGHT
-  }
+    let angle = data.angle.degree;
+    let distance = data.distance;
 
-  sendDir(dir);
-});
+    let dir = "S";
 
-joystick.on('end', function(){
-  sendDir('S');
-});
+    if (distance < 20) {
+      dir = "S";
+    }
+    else if (angle >= 45 && angle < 135) {
+      dir = "F";
+    }
+    else if (angle >= 135 && angle < 225) {
+      dir = "L";
+    }
+    else if (angle >= 225 && angle < 315) {
+      dir = "B";
+    }
+    else {
+      dir = "R";
+    }
+
+    sendDir(dir);
+  });
+
+  joystick.on('end', function(){
+    sendDir('S');
+  });
+}
 
 </script>
 
