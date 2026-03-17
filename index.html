@@ -2,6 +2,7 @@
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1">
+
 <style>
 body {
   font-family: Arial, Helvetica, sans-serif;
@@ -83,10 +84,11 @@ input:checked + .slider:before { transform: translateX(26px); }
 </head>
 
 <body>
+
 <div class="container">
   <h2>Wi-Fi Robot Controller</h2>
 
-  <!-- Toggle Switch -->
+  <!-- MODE SWITCH -->
   <label class="switch">
     <input type="checkbox" onchange="toggleMode(this)">
     <span class="slider"></span>
@@ -107,9 +109,7 @@ input:checked + .slider:before { transform: translateX(26px); }
       Left
     </button>
 
-    <button class="btn stop" onclick="cmd('S')">
-      Stop
-    </button>
+    <button class="btn stop" onclick="cmd('S')">Stop</button>
 
     <button class="btn"
       onmousedown="cmd('R')" onmouseup="cmd('S')"
@@ -124,11 +124,12 @@ input:checked + .slider:before { transform: translateX(26px); }
     </button>
   </div>
 
-  <!-- JOYSTICK CONTROLS -->
+  <!-- JOYSTICK -->
   <div id="joystickControls" style="display:none;">
     <div id="joy" style="width:220px;height:220px;margin:20px auto;"></div>
   </div>
 
+  <!-- SPEED -->
   <div class="speed-box">
     <p>Speed Control</p>
     <input type="range" min="0" max="1023" value="800"
@@ -137,14 +138,19 @@ input:checked + .slider:before { transform: translateX(26px); }
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/nipplejs@0.10.1/dist/nipplejs.min.js"></script>
+
 <script>
+
+// ---------- BASIC ----------
 function cmd(c){
   fetch('/move?dir=' + c);
 }
+
 function setSpeed(v){
   fetch('/speed?val=' + v);
 }
 
+// ---------- MODE SWITCH ----------
 function toggleMode(el){
   const btn = document.getElementById("buttonControls");
   const joy = document.getElementById("joystickControls");
@@ -161,39 +167,55 @@ function toggleMode(el){
   }
 }
 
-// Joystick
+// ---------- JOYSTICK FINAL FIX ----------
+let lastDir = "";
+
+function sendDir(dir){
+  if(dir !== lastDir){
+    fetch('/move?dir=' + dir);
+    lastDir = dir;
+  }
+}
+
 var joystick = nipplejs.create({
   zone: document.getElementById('joy'),
-  mode: 'static',
-  position: { left: '50%', top: '50%' },
-  color: 'white'
+  mode: 'dynamic',   // 🔥 FIXED
+  color: 'white',
+  size: 150
 });
 
 joystick.on('move', function(evt, data) {
-  if (data) {
-    let angle = data.angle.degree;
-    let force = data.force;
+  if (!data || !data.angle) return;
 
-    if (force < 0.2) return; // ignore small movements
+  let angle = data.angle.degree;
+  let distance = data.distance;
 
-    if (angle >= 45 && angle < 135) {
-      cmd('F');   // Forward
-    } 
-    else if (angle >= 135 && angle < 225) {
-      cmd('L');   // Left
-    } 
-    else if (angle >= 225 && angle < 315) {
-      cmd('B');   // Backward
-    } 
-    else {
-      cmd('R');   // Right
-    }
+  let dir = "S";
+
+  if (distance < 20) {
+    dir = "S";
   }
+  else if (angle >= 45 && angle < 135) {
+    dir = "F"; // UP
+  }
+  else if (angle >= 135 && angle < 225) {
+    dir = "L"; // LEFT
+  }
+  else if (angle >= 225 && angle < 315) {
+    dir = "B"; // DOWN
+  }
+  else {
+    dir = "R"; // RIGHT
+  }
+
+  sendDir(dir);
 });
 
 joystick.on('end', function(){
-  fetch('/move?dir=S');
+  sendDir('S');
 });
+
 </script>
+
 </body>
 </html>
