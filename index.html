@@ -170,10 +170,24 @@ var joystick = nipplejs.create({
 });
 
 joystick.on('move', function(evt, data) {
-  if(data){
-    let x = Math.round(data.vector.x * 100);
-    let y = Math.round(data.vector.y * 100);
-    fetch(`/move?x=${x}&y=${y}`);
+  if (data) {
+    let angle = data.angle.degree;
+    let force = data.force;
+
+    if (force < 0.2) return; // ignore small movements
+
+    if (angle >= 45 && angle < 135) {
+      cmd('F');   // Forward
+    } 
+    else if (angle >= 135 && angle < 225) {
+      cmd('L');   // Left
+    } 
+    else if (angle >= 225 && angle < 315) {
+      cmd('B');   // Backward
+    } 
+    else {
+      cmd('R');   // Right
+    }
   }
 });
 
