@@ -5,226 +5,132 @@
 
 <style>
 body {
-  font-family: Arial, Helvetica, sans-serif;
-  background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
-  text-align: center;
+  font-family: 'Segoe UI', sans-serif;
   margin: 0;
   padding: 0;
-  min-height: 100vh;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  background: linear-gradient(-45deg, #0f2027, #203a43, #2c5364, #1a1a2e);
+  background-size: 400% 400%;
+  animation: gradientBG 10s ease infinite;
+}
+
+@keyframes gradientBG {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
 
 .container {
-  max-width: 360px;
-  margin: auto;
-  padding: 20px;
-  backdrop-filter: blur(10px);
-  background: rgba(255,255,255,0.08);
-  border-radius: 16px;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.2);
-}
-
-h2 { color: #fff; }
-
-.btn {
-  width: 100px;
-  height: 55px;
-  font-size: 16px;
-  margin: 6px;
-  border: none;
-  border-radius: 10px;
-  background: #4a6fa5;
+  width: 320px;
+  padding: 25px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(15px);
+  box-shadow: 0 0 30px rgba(0,0,0,0.4);
+  text-align: center;
   color: white;
 }
 
-.btn:active { background: #103465; }
+h2 {
+  margin-bottom: 20px;
+}
 
-.stop { background: #d9534f; }
-.stop:active { background: #b52b27; }
+.btn {
+  width: 90px;
+  height: 55px;
+  margin: 8px;
+  border: none;
+  border-radius: 12px;
+  font-size: 20px;
+  font-weight: bold;
+  color: white;
+  cursor: pointer;
+
+  background: linear-gradient(145deg, #00c6ff, #0072ff);
+  box-shadow: 0 0 10px rgba(0, 150, 255, 0.6);
+
+  transition: all 0.2s ease;
+}
+
+.btn:hover {
+  transform: scale(1.08);
+  box-shadow: 0 0 20px rgba(0, 150, 255, 1);
+}
+
+.btn:active {
+  transform: scale(0.95);
+  box-shadow: 0 0 8px rgba(0, 150, 255, 0.5);
+}
 
 .speed-box {
   margin-top: 20px;
-  background: rgba(255,255,255,0.15);
   padding: 15px;
-  border-radius: 12px;
-  color: white;
+  border-radius: 15px;
+  background: rgba(255,255,255,0.1);
 }
 
-input[type=range] { width: 100%; }
-
-.switch {
-  position: relative;
-  display: inline-block;
-  width: 60px;
-  height: 34px;
-}
-.switch input { display:none; }
-
-.slider {
-  position: absolute;
+input[type=range] {
+  width: 100%;
   cursor: pointer;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background-color: #ccc;
-  transition: .4s;
-  border-radius: 34px;
 }
-.slider:before {
-  position: absolute;
-  content: "";
-  height: 26px; width: 26px;
-  left: 4px; bottom: 4px;
-  background-color: white;
-  transition: .4s;
-  border-radius: 50%;
-}
-input:checked + .slider { background-color: #2196F3; }
-input:checked + .slider:before { transform: translateX(26px); }
 
-.mode-label { color:white; margin:8px; }
+p {
+  margin-bottom: 10px;
+  font-weight: bold;
+}
 </style>
 </head>
 
 <body>
 
 <div class="container">
-  <h2>Wi-Fi Robot Controller</h2>
+  <h2>🚗 Robot Controller</h2>
 
-  <!-- MODE SWITCH -->
-  <label class="switch">
-    <input type="checkbox" onchange="toggleMode(this)">
-    <span class="slider"></span>
-  </label>
-  <div class="mode-label" id="modeLabel">Button Controls</div>
+  <!-- Forward -->
+  <button class="btn"
+    onmousedown="cmd('F')" onmouseup="cmd('S')"
+    ontouchstart="cmd('F')" ontouchend="cmd('S')">
+    ⬆️
+  </button><br>
 
-  <!-- BUTTON CONTROLS -->
-  <div id="buttonControls">
-    <button class="btn"
-      onmousedown="cmd('F')" onmouseup="cmd('S')"
-      ontouchstart="cmd('F')" ontouchend="cmd('S')">
-      Forward
-    </button><br>
+  <!-- Left & Right -->
+  <button class="btn"
+    onmousedown="cmd('L')" onmouseup="cmd('S')"
+    ontouchstart="cmd('L')" ontouchend="cmd('S')">
+    ⬅️
+  </button>
 
-    <button class="btn"
-      onmousedown="cmd('L')" onmouseup="cmd('S')"
-      ontouchstart="cmd('L')" ontouchend="cmd('S')">
-      Left
-    </button>
+  <button class="btn"
+    onmousedown="cmd('R')" onmouseup="cmd('S')"
+    ontouchstart="cmd('R')" ontouchend="cmd('S')">
+    ➡️
+  </button><br>
 
-    <button class="btn stop" onclick="cmd('S')">Stop</button>
+  <!-- Backward -->
+  <button class="btn"
+    onmousedown="cmd('B')" onmouseup="cmd('S')"
+    ontouchstart="cmd('B')" ontouchend="cmd('S')">
+    ⬇️
+  </button>
 
-    <button class="btn"
-      onmousedown="cmd('R')" onmouseup="cmd('S')"
-      ontouchstart="cmd('R')" ontouchend="cmd('S')">
-      Right
-    </button><br>
-
-    <button class="btn"
-      onmousedown="cmd('B')" onmouseup="cmd('S')"
-      ontouchstart="cmd('B')" ontouchend="cmd('S')">
-      Backward
-    </button>
-  </div>
-
-  <!-- JOYSTICK -->
-  <div id="joystickControls" style="display:none;">
-    <div id="joy" style="width:220px;height:220px;margin:20px auto;"></div>
-  </div>
-
-  <!-- SPEED -->
   <div class="speed-box">
-    <p>Speed Control</p>
+    <p>⚡ Speed Control</p>
     <input type="range" min="0" max="1023" value="800"
            onchange="setSpeed(this.value)">
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/nipplejs@0.10.1/dist/nipplejs.min.js"></script>
-
 <script>
-
-// -------- BASIC --------
 function cmd(c){
   fetch('/move?dir=' + c);
 }
-
 function setSpeed(v){
   fetch('/speed?val=' + v);
 }
-
-// -------- MODE SWITCH --------
-function toggleMode(el){
-  const btn = document.getElementById("buttonControls");
-  const joy = document.getElementById("joystickControls");
-  const label = document.getElementById("modeLabel");
-
-  if(el.checked){
-    btn.style.display = "none";
-    joy.style.display = "block";
-    label.innerText = "Joystick Controls";
-
-    // 🔥 create joystick AFTER visible
-    setTimeout(createJoystick, 100);
-
-  } else {
-    btn.style.display = "block";
-    joy.style.display = "none";
-    label.innerText = "Button Controls";
-  }
-}
-
-// -------- JOYSTICK FIX --------
-let joystick = null;
-let lastDir = "";
-
-function sendDir(dir){
-  if(dir !== lastDir){
-    fetch('/move?dir=' + dir);
-    lastDir = dir;
-  }
-}
-
-function createJoystick(){
-
-  if(joystick) return;
-
-  joystick = nipplejs.create({
-    zone: document.getElementById('joy'),
-    mode: 'dynamic',
-    color: 'white',
-    size: 150
-  });
-
-  joystick.on('move', function(evt, data) {
-    if (!data || !data.angle) return;
-
-    let angle = data.angle.degree;
-    let distance = data.distance;
-
-    let dir = "S";
-
-    if (distance < 20) {
-      dir = "S";
-    }
-    else if (angle >= 45 && angle < 135) {
-      dir = "F";
-    }
-    else if (angle >= 135 && angle < 225) {
-      dir = "L";
-    }
-    else if (angle >= 225 && angle < 315) {
-      dir = "B";
-    }
-    else {
-      dir = "R";
-    }
-
-    sendDir(dir);
-  });
-
-  joystick.on('end', function(){
-    sendDir('S');
-  });
-}
-
 </script>
 
 </body>
